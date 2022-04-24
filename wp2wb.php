@@ -1,12 +1,12 @@
 <?php
 /*
-Plugin Name: WordPres 同步微博
-Plugin URI: https://github.com/85Ryan/wp2wb/
+Plugin Name: WordPress 同步微博
+Plugin URI: https://github.com/steelm/wp2wb2/
 Description: 将你的 WordPress 网站与新浪微博关联，在发布文章时自动将文章同步发布到新浪微博，并且可以选择以普通微博方式发布或者头条文章方式发布。使用前需要先在 <a href="http://open.weibo.com">新浪开放平台</a> 创建网站网页应用。
-Author: Ryan
-Version: 1.1.0
+Author: Ryan（and modified by sTeeLM）
+Version: 1.2.0
 Text Domain: wp2wb
-Author URI: https://iiiryan.com/
+Author URI: https://www.madcat.cc
 */
 
 // Array of options and their default values.
@@ -20,6 +20,8 @@ $wp2wb_options = array (
     'wp2wb_sync'                => 'disable',
     'wp2wb_weibo_type'          => 'simple',
     'wp2wb_update_sync'         => 'false',
+	'wp2wb_html2img'            => 'false',
+	'wp2wb_html2img_width'      => 80,
 );
 
 include_once(dirname(__FILE__) . '/sync.php');
@@ -105,6 +107,8 @@ if ( !function_exists('wp2wb_options_update') ) {
             update_option('wp2wb_access_token', $wp2wb_access_token);
             update_option('wp2wb_sync', $_POST['wp2wb_sync']);
             update_option('wp2wb_weibo_type', $_POST['wp2wb_weibo_type']);
+			update_option('wp2wb_html2img', $_POST['wp2wb_html2img']);
+			update_option('wp2wb_html2img_width', $_POST['wp2wb_html2img_width']);
 
             $update_sync = !empty($_POST['wp2wb_update_sync']) ? $_POST['wp2wb_update_sync'] : 'false';
             update_option('wp2wb_update_sync', $update_sync);
@@ -230,8 +234,19 @@ if ( !function_exists('wp2wb_option_page') ) {
                     <tr valign="top">
                         <th scope="row"><?php _e('Weibo Type', 'wp2wb'); ?></th>
                         <td><p><input id="simple_weibo" class="wp2wb_weibo_type" type="radio" name="wp2wb_weibo_type" value="simple" <?php checked( 'simple', get_option( 'wp2wb_weibo_type' ) ); ?> /><label for="simple_weibo"><?php _e( 'Simple Weibo', 'wp2wb' ); ?></label></p>
-                        <p><input id="article_weibo" class="wp2wb_weibo_type" type="radio" name="wp2wb_weibo_type" value="article" <?php checked( 'article', get_option( 'wp2wb_weibo_type' ) ); ?> /><label for="article_weibo"><?php _e( 'Toutiao Article', 'wp2wb' ); ?></label></p>
+						<p><input id="article_weibo" class="wp2wb_weibo_type" type="radio" name="wp2wb_weibo_type" value="article" <?php checked( 'article', get_option( 'wp2wb_weibo_type' ) ); ?> /><label for="article_weibo"><?php _e( 'Toutiao Article', 'wp2wb' ); ?></label></p>
                         <p class="description"><?php _e( 'Sina toutiao article api need to apply for advanced privileges. You can go to <strong><a href="http://open.weibo.com">Sina Open Platform</a></strong> to apply.', 'wp2wb' ); ?></p></td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row"><?php _e('Content to image', 'wp2wb'); ?></th>
+                        <td><p><input id="wp2wb_html2img" class="wp2wb_html2img" type="checkbox" name="wp2wb_html2img" value="true" <?php checked( 'true', get_option( 'wp2wb_html2img' ) ); ?> />
+                        <label for="wp2wb_html2img"><?php _e( 'Transform content to image when not image include', 'wp2wb' ); ?></label>
+                        <p class="description"><?php _e( 'Transform content to image when not image include, because simple type article can not set title and text content.', 'wp2wb' ); ?></p>     
+                        </p></td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row"><label for="wp2wb_html2img_width"><?php _e( 'Image width', 'wp2wb' ); ?></label></th>
+                        <td><input name="wp2wb_html2img_width" type="text" id="wp2wb_html2img_width" value="<?php print( get_option( 'wp2wb_html2img_width' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'Width of content image.', 'wp2wb' ); ?></p></td>
                     </tr>
                     <tr valign="top">
                         <th scope="row"><?php _e('Post Update Sync', 'wp2wb'); ?></th>

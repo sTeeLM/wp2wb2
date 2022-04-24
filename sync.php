@@ -3,9 +3,9 @@
  * wp2wb Sync functions.
  *
  * @package     wp2wb
- * @author      Ryan
+ * @author      Ryan ( and sTeeLM)
  * @license     GPL 3.0
- * @version     1.0
+ * @version     1.1
  */
 
 if ( get_option('wp2wb_sync') == 'enable' ) {
@@ -31,6 +31,53 @@ if ( !function_exists( 'wp2wb_sync_add_sidebox' ) ) {
     }
 }
 
+require_once __DIR__ . '/vendor/autoload.php';
+
+if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
+	function wp2wb_trans_html_to_img($post_content) {
+		$p = 'P';
+		$uniq_name = md5($post_content).'__'.time();
+
+		$pdf_file_name = $uniq_name.'.pdf';
+		$png_file_name = $uniq_name.'.png';
+		$pdf_file_path = '/tmp/'.$pdf_file_name;
+		$png_file_path = '/tmp/'.$png_file_path;
+
+		$img_width = get_option('wp2wb_html2img_width');
+
+		$mpdf= new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => [$img_width,1000000], 
+			'margin_left' => 1, 'margin_right' => 1, 'margin_top' => 1, 'margin_bottom' => 1]);
+		$mpdf->autoScriptToLang = true;
+		$mpdf->autoLangToFont = true;
+		$mpdf->SetDisplayMode('fullpage');
+		$mpdf->WriteHTML($html);
+		$mpdf->_setPageSize(array($img_width, $mpdf->y), $p);
+		$mpdf->addPage();
+		$mpdf->WriteHTML($html);
+		$mpdf->DeletePages(1,1);
+		$mpdf->Output($pdf_file_path);
+
+		$im = new Imagick();
+		$im->setResolution(300, 300);
+		$im->setCompressionQuality(100);
+
+		$im->readImage($pdf_file_path);
+		//$im->setImageResolution(96, 96);
+		//$im->setImageUnits(imagick::RESOLUTION_PIXELSPERINCH);
+		$im->resetIterator();
+		$imgs = $im->appendImages(true);
+		$imgs->setImageFormat("png");
+		$imgs->writeImage($png_file_path);
+		$imgs->clear();
+		$imgs->destroy();
+		$im->clear();
+		$im->destroy();
+
+		//unlink($pdf_file_path);
+		return $png_file_path;
+	}
+}
+
 // Update Sync Function.
 if ( !function_exists('wp2wb_update_sync_publish') ) {
     function wp2wb_update_sync_publish($post_ID) {
@@ -48,8 +95,12 @@ if ( !function_exists('wp2wb_update_sync_publish') ) {
         if ( get_option('wp2wb_weibo_type') == 'simple' ) {
             $apiurl = 'https://api.weibo.com/2/statuses/share.json';
             $status = sprintf( __( 'I just published a new article:  %1$s, click here for details: %2$s.', 'wp2wb' ), $post_title, $post_url );
-            if( !empty($pic_src) ) {
-                $pic_file = str_replace(home_url(),$_SERVER["DOCUMENT_ROOT"],$pic_src);
+            if( !empty($pic_src) || get_option('wp2wb_html2img')) {
+				if(!empty($pic_src)) {
+					$pic_file = str_replace(home_url(),$_SERVER["DOCUMENT_ROOT"],$pic_src);
+				} elseif (get_option('wp2wb_html2img')) {
+					$pic_file = wp2wb_trans_html_to_img($post_content);
+				}
                 if( !empty($pic_file) ) {
                     $file_content = file_get_contents($pic_file);
                 } else {
@@ -72,7 +123,7 @@ if ( !function_exists('wp2wb_update_sync_publish') ) {
                 $headers[] = "Content-Type: multipart/form-data; boundary=" . $sep;
                 $data = $multibody;
             } else {
-                $data = "status=" . urlencode($status);
+				$data = "status=" . urlencode($status);
             }
         }
 
@@ -104,10 +155,10 @@ if ( !function_exists('wp2wb_update_sync_publish') ) {
         curl_close($ch);
         
         // debug
-        //$results = json_decode($response);
-        //var_dump($results);
-        //echo '<hr />';
-        //var_dump($data);
+        $results = json_decode($response);
+        var_dump($results);
+        echo '<hr />';
+        var_dump($data);
     }
 }
 
@@ -129,8 +180,12 @@ if ( !function_exists('wp2wb_sync_publish') ) {
             if ( get_option('wp2wb_weibo_type') == 'simple' ) {
                 $apiurl = 'https://api.weibo.com/2/statuses/share.json';
                 $status = sprintf( __( 'I just published a new article:  %1$s, click here for details: %2$s.', 'wp2wb' ), $post_title, $post_url );
-                if( !empty($pic_src) ) {
-                    $pic_file = str_replace(home_url(),$_SERVER["DOCUMENT_ROOT"],$pic_src);
+                if( !empty($pic_src) || get_option('wp2wb_html2img') ) {
+					if(!empty($pic_src)) {
+						$pic_file = str_replace(home_url(),$_SERVER["DOCUMENT_ROOT"],$pic_src);
+					} elseif (get_option('wp2wb_html2img')) {
+						$pic_file = wp2wb_trans_html_to_img($post_content);
+					}
                     if( !empty($pic_file) ) {
                         $file_content = file_get_contents($pic_file);
                     } else {
@@ -153,7 +208,7 @@ if ( !function_exists('wp2wb_sync_publish') ) {
                     $headers[] = "Content-Type: multipart/form-data; boundary=" . $sep;
                     $data = $multibody;
                 } else {
-                    $data = "status=" . urlencode($status);
+					$data = "status=" . urlencode($status);
                 }
             }
 
@@ -187,9 +242,9 @@ if ( !function_exists('wp2wb_sync_publish') ) {
             $results = json_decode($response);
             
             // debug
-            //var_dump($results);
-            //echo '<hr />';
-            //var_dump($data);
+            var_dump($results);
+            echo '<hr />';
+            var_dump($data);
         }
     }
 }
