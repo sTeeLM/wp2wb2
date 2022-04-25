@@ -27,8 +27,8 @@ msgstr "同步微博设置"
 
 #: sync.php:105 sync.php:197
 #, php-format
-msgid "%1$s, click here for details: %2$s."
-msgstr "《%1$s》详细内容请点击： %2$s"
+msgid "%1$s: %2$s."
+msgstr "《%1$s》： %2$s"
 
 #: sync.php:146 sync.php:238
 #, php-format
