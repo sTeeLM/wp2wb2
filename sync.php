@@ -41,7 +41,7 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
 		$pdf_file_name = $uniq_name.'.pdf';
 		$png_file_name = $uniq_name.'.png';
 		$pdf_file_path = '/tmp/'.$pdf_file_name;
-		$png_file_path = '/tmp/'.$png_file_path;
+		$png_file_path = '/tmp/'.$png_file_name;
 
 		$img_width = get_option('wp2wb_html2img_width');
 
@@ -50,10 +50,10 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
 		$mpdf->autoScriptToLang = true;
 		$mpdf->autoLangToFont = true;
 		$mpdf->SetDisplayMode('fullpage');
-		$mpdf->WriteHTML($html);
+		$mpdf->WriteHTML($post_content);
 		$mpdf->_setPageSize(array($img_width, $mpdf->y), $p);
 		$mpdf->addPage();
-		$mpdf->WriteHTML($html);
+		$mpdf->WriteHTML($post_content);
 		$mpdf->DeletePages(1,1);
 		$mpdf->Output($pdf_file_path);
 
@@ -73,7 +73,7 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
 		$im->clear();
 		$im->destroy();
 
-		//unlink($pdf_file_path);
+		unlink($pdf_file_path);
 		return $png_file_path;
 	}
 }
@@ -82,6 +82,7 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
 if ( !function_exists('wp2wb_update_sync_publish') ) {
     function wp2wb_update_sync_publish($post_ID) {
         global $post;
+		$remove_image = false;
         if (isset($post) && $post->post_type != 'post' || isset($_POST['publish_no_sync'])) return;
         $post = get_post($post_ID);
         $access_token = get_option('wp2wb_access_token');
@@ -100,12 +101,18 @@ if ( !function_exists('wp2wb_update_sync_publish') ) {
 					$pic_file = str_replace(home_url(),$_SERVER["DOCUMENT_ROOT"],$pic_src);
 				} elseif (get_option('wp2wb_html2img')) {
 					$pic_file = wp2wb_trans_html_to_img($post_content);
+					$remove_image = true;
 				}
                 if( !empty($pic_file) ) {
                     $file_content = file_get_contents($pic_file);
                 } else {
                     $file_content = file_get_contents($pic_src);
                 }
+
+				if($remove_image && !empty($pic_file) ) {
+					unlink($pic_file);
+				}
+
                 $array = explode('?', basename($pic_src));
                 $file_name = $array[0];
                 $sep = uniqid('------------------');
@@ -155,10 +162,10 @@ if ( !function_exists('wp2wb_update_sync_publish') ) {
         curl_close($ch);
         
         // debug
-        $results = json_decode($response);
-        var_dump($results);
-        echo '<hr />';
-        var_dump($data);
+        // $results = json_decode($response);
+        // var_dump($results);
+        // echo '<hr />';
+        // var_dump($data);
     }
 }
 
@@ -166,6 +173,7 @@ if ( !function_exists('wp2wb_update_sync_publish') ) {
 if ( !function_exists('wp2wb_sync_publish') ) {
     function wp2wb_sync_publish($post_ID) {
         global $post;
+		$remove_image = false;
         if (!wp_is_post_revision($post_ID) && $post->post_status != 'publish'){
             if (isset($post) && $post->post_type != 'post' || isset($_POST['publish_no_sync'])) return;
             $post = get_post($post_ID);
@@ -185,12 +193,18 @@ if ( !function_exists('wp2wb_sync_publish') ) {
 						$pic_file = str_replace(home_url(),$_SERVER["DOCUMENT_ROOT"],$pic_src);
 					} elseif (get_option('wp2wb_html2img')) {
 						$pic_file = wp2wb_trans_html_to_img($post_content);
+						$remove_image = true;
 					}
                     if( !empty($pic_file) ) {
                         $file_content = file_get_contents($pic_file);
                     } else {
                         $file_content = file_get_contents($pic_src);
                     }
+
+					if($remove_image && !empty($pic_file) ) {
+						unlink($pic_file);
+					}
+
                     $array = explode('?', basename($pic_src));
                     $file_name = $array[0];
                     $sep = uniqid('------------------');
@@ -242,9 +256,9 @@ if ( !function_exists('wp2wb_sync_publish') ) {
             $results = json_decode($response);
             
             // debug
-            var_dump($results);
-            echo '<hr />';
-            var_dump($data);
+            // var_dump($results);
+            // echo '<hr />';
+            // var_dump($data);
         }
     }
 }
