@@ -38,12 +38,12 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
         $p = 'P';
         $uniq_name = md5($post_content).'__'.time();
         $temp_base = '/tmp/wp2wb2/';
-        mkdir($temp_base);
-
         $pdf_file_name = $uniq_name.'.pdf';
         $png_file_name = $uniq_name.'.png';
         $pdf_file_path = $temp_base.$pdf_file_name;
         $png_file_path = $temp_base.$png_file_name;
+
+        mkdir($temp_base);
 
         $html = '<html lang="zh_CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>'.
             '<style>'.get_option('wp2wb_html2img_css').
@@ -52,8 +52,34 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
 
         $img_width = get_option('wp2wb_html2img_width');
 
-        $mpdf= new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => [$img_width,1000000], 
-            'margin_left' => 1, 'margin_right' => 1, 'margin_top' => 0, 'margin_bottom' => 0]);
+        $defaultConfig = (new Mpdf\Config\ConfigVariables())->getDefaults();
+        $fontDirs = $defaultConfig['fontDir'];
+
+        $defaultFontConfig = (new Mpdf\Config\FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+        $sansFonts = $defaultFontConfig['sans_fonts'];
+        $serifFonts = $defaultFontConfig['serif_fonts'];
+        $monoFonts = $defaultFontConfig['mono_fonts'];
+
+        $mpdf= new \Mpdf\Mpdf([
+            'fontDir' => array_merge($fontDirs, [
+                __DIR__ . '/assets/fonts',]),
+            'fontdata' => $fontData + [
+                'pingfang' => [
+                'R' => 'PingFang Light.ttf',
+                'B' => 'PingFang Bold.ttf',
+                ]],
+            'sans_fonts' => array_merge($sansFonts, ['pingfang',]),
+            'serif_fonts' => array_merge($serifFonts, ['pingfang',]),
+            'mono_fonts' => array_merge($monoFonts, ['pingfang',]),
+            'mode' => 'utf-8', 
+            'format' => [$img_width, 1000000], 
+            'default_font' => 'pingfang',
+            'margin_left' => 1, 
+            'margin_right' => 1, 
+            'margin_top' => 0, 
+            'margin_bottom' => 0]);
+
         $mpdf->autoScriptToLang = true;
         $mpdf->autoLangToFont = true;
         $mpdf->SetDisplayMode('fullpage');
