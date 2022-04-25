@@ -45,9 +45,10 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
 
         mkdir($temp_base);
 
+        $css = file_get_contents(__DIR__ . get_option('wp2wb_html2img_css'));
+
         $html = '<html lang="zh_CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>'.
-            '<style>'.get_option('wp2wb_html2img_css').
-            '</style></head><body>'.$post_content.
+            '<style>'.$css.'</style></head><body>'.$post_content.
             '</body></html>';
 
         $img_width = get_option('wp2wb_html2img_width');
@@ -57,9 +58,6 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
 
         $defaultFontConfig = (new Mpdf\Config\FontVariables())->getDefaults();
         $fontData = $defaultFontConfig['fontdata'];
-        $sansFonts = $defaultFontConfig['sans_fonts'];
-        $serifFonts = $defaultFontConfig['serif_fonts'];
-        $monoFonts = $defaultFontConfig['mono_fonts'];
 
         $mpdf= new \Mpdf\Mpdf([
             'fontDir' => array_merge($fontDirs, [
@@ -69,12 +67,9 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
                 'R' => 'PingFang Light.ttf',
                 'B' => 'PingFang Bold.ttf',
                 ]],
-            'sans_fonts' => array_merge($sansFonts, ['pingfang',]),
-            'serif_fonts' => array_merge($serifFonts, ['pingfang',]),
-            'mono_fonts' => array_merge($monoFonts, ['pingfang',]),
+            'default_font' => 'pingfang',
             'mode' => 'utf-8', 
             'format' => [$img_width, 1000000], 
-            'default_font' => 'pingfang',
             'margin_left' => 1, 
             'margin_right' => 1, 
             'margin_top' => 0, 

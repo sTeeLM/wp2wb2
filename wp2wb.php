@@ -22,7 +22,7 @@ $wp2wb_options = array (
     'wp2wb_update_sync'         => 'false',
     'wp2wb_html2img'            => 'false',
     'wp2wb_html2img_width'      => 50,
-    'wp2wb_html2img_css'        => 'body {font-family: Arial, Helvetica, sans-serif;font-size: small;font-style:normal;letter-spacing:1px;background-color: #DFDBC6;} p {line-height:100%;}',
+    'wp2wb_html2img_css'        => '/assets/default.css',
 );
 
 include_once(dirname(__FILE__) . '/sync.php');
