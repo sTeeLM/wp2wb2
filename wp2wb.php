@@ -20,8 +20,9 @@ $wp2wb_options = array (
     'wp2wb_sync'                => 'disable',
     'wp2wb_weibo_type'          => 'simple',
     'wp2wb_update_sync'         => 'false',
-	'wp2wb_html2img'            => 'false',
-	'wp2wb_html2img_width'      => 80,
+    'wp2wb_html2img'            => 'false',
+    'wp2wb_html2img_width'      => 50,
+    'wp2wb_html2img_css'        => 'body {font-family: Arial, Helvetica, sans-serif;font-size: small;font-style:normal;letter-spacing:1px;background-color: #DFDBC6;} p {line-height:100%;}',
 );
 
 include_once(dirname(__FILE__) . '/sync.php');
@@ -109,6 +110,7 @@ if ( !function_exists('wp2wb_options_update') ) {
             update_option('wp2wb_weibo_type', $_POST['wp2wb_weibo_type']);
 			update_option('wp2wb_html2img', $_POST['wp2wb_html2img']);
 			update_option('wp2wb_html2img_width', $_POST['wp2wb_html2img_width']);
+			update_option('wp2wb_html2img_css', $_POST['wp2wb_html2img_css']);
 
             $update_sync = !empty($_POST['wp2wb_update_sync']) ? $_POST['wp2wb_update_sync'] : 'false';
             update_option('wp2wb_update_sync', $update_sync);
@@ -247,6 +249,10 @@ if ( !function_exists('wp2wb_option_page') ) {
                     <tr valign="top">
                         <th scope="row"><label for="wp2wb_html2img_width"><?php _e( 'Image width', 'wp2wb' ); ?></label></th>
                         <td><input name="wp2wb_html2img_width" type="text" id="wp2wb_html2img_width" value="<?php print( get_option( 'wp2wb_html2img_width' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'Width of content image.', 'wp2wb' ); ?></p></td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row"><label for="wp2wb_html2img_css"><?php _e( 'CSS when create image', 'wp2wb' ); ?></label></th>
+                        <td><input name="wp2wb_html2img_css" type="text" id="wp2wb_html2img_css" value="<?php print( get_option( 'wp2wb_html2img_css' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'CSS used by mpdf when create pdf, then create image.', 'wp2wb' ); ?></p></td>
                     </tr>
                     <tr valign="top">
                         <th scope="row"><?php _e('Post Update Sync', 'wp2wb'); ?></th>

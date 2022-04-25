@@ -37,23 +37,30 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
 	function wp2wb_trans_html_to_img($post_content) {
 		$p = 'P';
 		$uniq_name = md5($post_content).'__'.time();
+		$temp_base = '/tmp/wp2wb2/';
+		mkdir($temp_base);
 
 		$pdf_file_name = $uniq_name.'.pdf';
 		$png_file_name = $uniq_name.'.png';
-		$pdf_file_path = '/tmp/'.$pdf_file_name;
-		$png_file_path = '/tmp/'.$png_file_name;
+		$pdf_file_path = $temp_base.$pdf_file_name;
+		$png_file_path = $temp_base.$png_file_name;
+
+		$html = '<html lang="zh_CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>'.
+			'<style>'.get_option('wp2wb_html2img_css').
+			'</style></head><body>'.$post_content.
+			'</body></html>';
 
 		$img_width = get_option('wp2wb_html2img_width');
 
 		$mpdf= new \Mpdf\Mpdf(['mode' => 'utf-8', 'format' => [$img_width,1000000], 
-			'margin_left' => 1, 'margin_right' => 1, 'margin_top' => 1, 'margin_bottom' => 1]);
+			'margin_left' => 1, 'margin_right' => 1, 'margin_top' => 0, 'margin_bottom' => 0]);
 		$mpdf->autoScriptToLang = true;
 		$mpdf->autoLangToFont = true;
 		$mpdf->SetDisplayMode('fullpage');
-		$mpdf->WriteHTML($post_content);
+		$mpdf->WriteHTML($html);
 		$mpdf->_setPageSize(array($img_width, $mpdf->y), $p);
 		$mpdf->addPage();
-		$mpdf->WriteHTML($post_content);
+		$mpdf->WriteHTML($html);
 		$mpdf->DeletePages(1,1);
 		$mpdf->Output($pdf_file_path);
 
@@ -73,7 +80,7 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
 		$im->clear();
 		$im->destroy();
 
-		unlink($pdf_file_path);
+		//unlink($pdf_file_path);
 		return $png_file_path;
 	}
 }
@@ -95,7 +102,7 @@ if ( !function_exists('wp2wb_update_sync_publish') ) {
 
         if ( get_option('wp2wb_weibo_type') == 'simple' ) {
             $apiurl = 'https://api.weibo.com/2/statuses/share.json';
-            $status = sprintf( __( 'I just published a new article:  %1$s, click here for details: %2$s.', 'wp2wb' ), $post_title, $post_url );
+            $status = sprintf( __( '%1$s: %2$s.', 'wp2wb' ), $post_title, $post_url );
             if( !empty($pic_src) || get_option('wp2wb_html2img')) {
 				if(!empty($pic_src)) {
 					$pic_file = str_replace(home_url(),$_SERVER["DOCUMENT_ROOT"],$pic_src);
@@ -109,9 +116,9 @@ if ( !function_exists('wp2wb_update_sync_publish') ) {
                     $file_content = file_get_contents($pic_src);
                 }
 
-				if($remove_image && !empty($pic_file) ) {
-					unlink($pic_file);
-				}
+//				if($remove_image && !empty($pic_file) ) {
+//					unlink($pic_file);
+//				}
 
                 $array = explode('?', basename($pic_src));
                 $file_name = $array[0];
@@ -187,7 +194,7 @@ if ( !function_exists('wp2wb_sync_publish') ) {
 
             if ( get_option('wp2wb_weibo_type') == 'simple' ) {
                 $apiurl = 'https://api.weibo.com/2/statuses/share.json';
-                $status = sprintf( __( 'I just published a new article:  %1$s, click here for details: %2$s.', 'wp2wb' ), $post_title, $post_url );
+                $status = sprintf( __( '%1$s: %2$s.', 'wp2wb' ), $post_title, $post_url );
                 if( !empty($pic_src) || get_option('wp2wb_html2img') ) {
 					if(!empty($pic_src)) {
 						$pic_file = str_replace(home_url(),$_SERVER["DOCUMENT_ROOT"],$pic_src);
@@ -201,9 +208,9 @@ if ( !function_exists('wp2wb_sync_publish') ) {
                         $file_content = file_get_contents($pic_src);
                     }
 
-					if($remove_image && !empty($pic_file) ) {
-						unlink($pic_file);
-					}
+//					if($remove_image && !empty($pic_file) ) {
+//						unlink($pic_file);
+//					}
 
                     $array = explode('?', basename($pic_src));
                     $file_name = $array[0];
