@@ -75,10 +75,19 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
             'margin_top' => 0, 
             'margin_bottom' => 0]);
 
-        if (get_option('wp2wb_html2img_watermark')) {
-            $mpdf->SetWatermarkText(get_option('wp2wb_html2img_watermark_txt'), 
-                get_option('wp2wb_html2img_watermark_alpha'));
-            $mpdf->showWatermarkText = true;
+        if (get_option('wp2wb_html2img_watermark') == 'true') {
+            if (get_option('wp2wb_html2img_watermark_type') == 'txt') {
+                $mpdf->SetWatermarkText(get_option('wp2wb_html2img_watermark_txt'), 
+                    get_option('wp2wb_html2img_watermark_alpha'));
+                $mpdf->showWatermarkText = true;
+            } elseif(get_option('wp2wb_html2img_watermark_type') == 'img') {
+                $watermark_img = get_option('wp2wb_html2img_watermark_img');
+                $watermark_img = $_SERVER["DOCUMENT_ROOT"].$watermark_img;
+                error_log('watermark_img at: '.$watermark_img);
+                $mpdf->SetWatermarkImage($watermark_img,
+                    get_option('wp2wb_html2img_watermark_alpha'));
+                $mpdf->showWatermarkImage = true;
+            }
         }
 
         $mpdf->autoScriptToLang = true;

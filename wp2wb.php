@@ -26,6 +26,8 @@ $wp2wb_options = array (
     'wp2wb_html2img_watermark'  => 'false',
     'wp2wb_html2img_watermark_txt' => 'steelmblog',
     'wp2wb_html2img_watermark_alpha' => 0.1,
+    'wp2wb_html2img_watermark_type'  => 'txt',
+    'wp2wb_html2img_watermark_img'   => '/wp-content/plugins/wp2wb2/assets/default-watermark.jpg'
 );
 
 include_once(dirname(__FILE__) . '/sync.php');
@@ -115,7 +117,9 @@ if ( !function_exists('wp2wb_options_update') ) {
 			update_option('wp2wb_html2img_width', $_POST['wp2wb_html2img_width']);
 			update_option('wp2wb_html2img_css', $_POST['wp2wb_html2img_css']);
 			update_option('wp2wb_html2img_watermark', $_POST['wp2wb_html2img_watermark']);
+			update_option('wp2wb_html2img_watermark_type', $_POST['wp2wb_html2img_watermark_type']);
 			update_option('wp2wb_html2img_watermark_txt', $_POST['wp2wb_html2img_watermark_txt']);
+			update_option('wp2wb_html2img_watermark_img', $_POST['wp2wb_html2img_watermark_img']);
 			update_option('wp2wb_html2img_watermark_alpha', $_POST['wp2wb_html2img_watermark_alpha']);
 
             $update_sync = !empty($_POST['wp2wb_update_sync']) ? $_POST['wp2wb_update_sync'] : 'false';
@@ -200,6 +204,7 @@ if ( !function_exists( 'wp2wb_option_notice' ) ) {
 // Define Option Page.
 if ( !function_exists('wp2wb_option_page') ) {
     function wp2wb_option_page() {
+        wp_enqueue_media();
     ?>
         <div class="wrap">
             <h1><?php _e('Sync to Weibo Settings', 'wp2wb') ?></h1>
@@ -229,8 +234,6 @@ if ( !function_exists('wp2wb_option_page') ) {
                         <p class="description"><?php echo wp2wb_oauth_time(); ?></p></td>
                     </tr>
                     <?php endif; ?>
-                </table>
-                <table class="form-table">
                     <tr valign="top">
                         <th scope="row"><?php _e('Sync Enable', 'wp2wb'); ?></th>
                         <td><p><input id="sync_enable" class="wp2wb_sync" type="radio" name="wp2wb_sync" value="enable" <?php checked( 'enable', get_option( 'wp2wb_sync' ) ); ?> /><label for="sync_enable"><?php _e( 'Sync Enable', 'wp2wb' ); ?></label></p>
@@ -238,50 +241,77 @@ if ( !function_exists('wp2wb_option_page') ) {
                         </td>
                     </tr>
                 </table>
-                <table id="wp2wb_enable" class="form-table wp2wb_enable">
-                    <tr valign="top">
-                        <th scope="row"><?php _e('Weibo Type', 'wp2wb'); ?></th>
-                        <td><p><input id="simple_weibo" class="wp2wb_weibo_type" type="radio" name="wp2wb_weibo_type" value="simple" <?php checked( 'simple', get_option( 'wp2wb_weibo_type' ) ); ?> /><label for="simple_weibo"><?php _e( 'Simple Weibo', 'wp2wb' ); ?></label></p>
-						<p><input id="article_weibo" class="wp2wb_weibo_type" type="radio" name="wp2wb_weibo_type" value="article" <?php checked( 'article', get_option( 'wp2wb_weibo_type' ) ); ?> /><label for="article_weibo"><?php _e( 'Toutiao Article', 'wp2wb' ); ?></label></p>
-                        <p class="description"><?php _e( 'Sina toutiao article api need to apply for advanced privileges. You can go to <strong><a href="http://open.weibo.com">Sina Open Platform</a></strong> to apply.', 'wp2wb' ); ?></p></td>
-                    </tr>
-                    <tr valign="top">
-                        <th scope="row"><?php _e('Post Update Sync', 'wp2wb'); ?></th>
-                        <td><label for="wp2wb_update_sync"><input name="wp2wb_update_sync" type="checkbox" id="wp2wb_update_sync" value="true" <?php checked('true', get_option('wp2wb_update_sync')); ?> /><?php _e('Enable Post Update Sync', 'wp2wb'); ?></label><p class="description"><?php _e( 'By default, the post sync is disabled when updated, check this option if you need to sync.', 'wp2wb' ); ?></p></td>
-                    </tr>
-                    <tr valign="top">
-                        <th scope="row"><?php _e('Content to image', 'wp2wb'); ?></th>
-                        <td><p><input id="wp2wb_html2img" class="wp2wb_html2img" type="checkbox" name="wp2wb_html2img" value="true"
-                            <?php checked( 'true', get_option( 'wp2wb_html2img' ) ); ?> />
-                        <label for="wp2wb_html2img"><?php _e( 'Transform content to image when not image include', 'wp2wb' ); ?></label>
-                        <p class="description"><?php _e( 'Transform content to image when not image include, because simple type article can not set title and text content.', 'wp2wb' ); ?></p>     
-                        </p></td>
-                    </tr>
-                    <tr valign="top">
-                        <th scope="row"><label for="wp2wb_html2img_width"><?php _e( 'Image width', 'wp2wb' ); ?></label></th>
-                        <td><input name="wp2wb_html2img_width" type="text" id="wp2wb_html2img_width" value="<?php print( get_option( 'wp2wb_html2img_width' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'Width of content image.', 'wp2wb' ); ?></p></td>
-                    </tr>
-                    <tr valign="top">
-                        <th scope="row"><label for="wp2wb_html2img_css"><?php _e( 'CSS when create image', 'wp2wb' ); ?></label></th>
-                        <td><input name="wp2wb_html2img_css" type="text" id="wp2wb_html2img_css" value="<?php print( get_option( 'wp2wb_html2img_css' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'CSS used by mpdf when create pdf, then create image.', 'wp2wb' ); ?></p></td>
-                    </tr>
-                    <tr valign="top">
-                        <th scope="row"><?php _e('Set watermark', 'wp2wb'); ?></th>
-                        <td><p><input id="wp2wb_html2img_watermark" class="wp2wb_html2img_watermark" type="checkbox" name="wp2wb_html2img_watermark" value="true" 
-                            <?php checked( 'true', get_option( 'wp2wb_html2img_watermark' ) ); ?> />
-                        <label for="wp2wb_html2img_watermark"><?php _e( 'Set watermark text on image', 'wp2wb' ); ?></label>
-                        <p class="description"><?php _e( 'Set watermark text on image when transform post context to image file.', 'wp2wb' ); ?></p>     
-                        </p></td>
-                    </tr>
-                    <tr valign="top">
-                        <th scope="row"><label for="wp2wb_html2img_watermark_txt"><?php _e( 'Watermark text on image', 'wp2wb' ); ?></label></th>
-                        <td><input name="wp2wb_html2img_watermark_txt" type="text" id="wp2wb_html2img_watermark_txt" value="<?php print( get_option( 'wp2wb_html2img_watermark_txt' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'Watermark text on image, length < 32.', 'wp2wb' ); ?></p></td>
-                    </tr>
-                    <tr valign="top">
-                        <th scope="row"><label for="wp2wb_html2img_watermark_alpha"><?php _e( 'Watermark alpha on image', 'wp2wb' ); ?></label></th>
-                        <td><input name="wp2wb_html2img_watermark_alpha" type="text" id="wp2wb_html2img_watermark_alpha" value="<?php print( get_option( 'wp2wb_html2img_watermark_alpha' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'Watermark alpha on image, between 0-1.', 'wp2wb' ); ?></p></td>
-                    </tr>
-                </table>
+                <div id="wp2wb_enable" >
+                    <table class="form-table">
+                        <tr valign="top">
+                            <th scope="row"><?php _e('Weibo Type', 'wp2wb'); ?></th>
+                            <td><p><input id="simple_weibo" class="wp2wb_weibo_type" type="radio" name="wp2wb_weibo_type" value="simple" <?php checked( 'simple', get_option( 'wp2wb_weibo_type' ) ); ?> /><label for="simple_weibo"><?php _e( 'Simple Weibo', 'wp2wb' ); ?></label></p>
+                            <p><input id="article_weibo" class="wp2wb_weibo_type" type="radio" name="wp2wb_weibo_type" value="article" <?php checked( 'article', get_option( 'wp2wb_weibo_type' ) ); ?> /><label for="article_weibo"><?php _e( 'Toutiao Article', 'wp2wb' ); ?></label></p>
+                            <p class="description"><?php _e( 'Sina toutiao article api need to apply for advanced privileges. You can go to <strong><a href="http://open.weibo.com">Sina Open Platform</a></strong> to apply.', 'wp2wb' ); ?></p></td>
+                        </tr>
+                        <tr valign="top">
+                            <th scope="row"><?php _e('Post Update Sync', 'wp2wb'); ?></th>
+                            <td><label for="wp2wb_update_sync"><input name="wp2wb_update_sync" type="checkbox" id="wp2wb_update_sync" value="true" <?php checked('true', get_option('wp2wb_update_sync')); ?> /><?php _e('Enable Post Update Sync', 'wp2wb'); ?></label><p class="description"><?php _e( 'By default, the post sync is disabled when updated, check this option if you need to sync.', 'wp2wb' ); ?></p></td>
+                        </tr>
+                        <tr valign="top" id="wp2wb_html2img" >
+                            <th scope="row"><?php _e('Content to image', 'wp2wb'); ?></th>
+                            <td><p><input id="wp2wb_html2img" class="wp2wb_html2img" type="checkbox" name="wp2wb_html2img" value="true"
+                                <?php checked( 'true', get_option( 'wp2wb_html2img' ) ); ?> />
+                            <label for="wp2wb_html2img"><?php _e( 'Transform content to image when not image include', 'wp2wb' ); ?></label>
+                            <p class="description"><?php _e( 'Transform content to image when not image include, because simple type article can not set title and text content.', 'wp2wb' ); ?></p>     
+                            </p></td>
+                        </tr>
+                    </table>
+
+                    <div id="wp2wb_html2img_enable" >
+                        <table class="form-table">
+                            <tr valign="top">
+                                <th scope="row"><label for="wp2wb_html2img_width"><?php _e( 'Image width', 'wp2wb' ); ?></label></th>
+                                <td><input name="wp2wb_html2img_width" type="text" id="wp2wb_html2img_width" value="<?php print( get_option( 'wp2wb_html2img_width' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'Width of content image.', 'wp2wb' ); ?></p></td>
+                            </tr>
+                            <tr valign="top">
+                                <th scope="row"><label for="wp2wb_html2img_css"><?php _e( 'CSS when create image', 'wp2wb' ); ?></label></th>
+                                <td><input name="wp2wb_html2img_css" type="text" id="wp2wb_html2img_css" value="<?php print( get_option( 'wp2wb_html2img_css' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'CSS used by mpdf when create pdf, then create image.', 'wp2wb' ); ?></p></td>
+                            </tr>
+                            <tr valign="top">
+                                <th scope="row"><?php _e('Set watermark', 'wp2wb'); ?></th>
+                                <td><p><input id="wp2wb_html2img_watermark" class="wp2wb_html2img_watermark" type="checkbox" name="wp2wb_html2img_watermark" value="true" 
+                                    <?php checked( 'true', get_option( 'wp2wb_html2img_watermark' ) ); ?> />
+                                <label for="wp2wb_html2img_watermark"><?php _e( 'Set watermark text on image', 'wp2wb' ); ?></label>
+                                <p class="description"><?php _e( 'Set watermark text on image when transform post context to image file.', 'wp2wb' ); ?></p>     
+                                </p></td>
+                            </tr>
+                        </table>
+                        <div id="wp2wb_html2img_watermark_enable" >
+                            <table class="form-table">
+                                <tr valign="top">
+                                    <th scope="row"><?php _e('Water Mark Type', 'wp2wb'); ?></th>
+                                    <td><p><input id="txt_watermark" class="wp2wb_html2img_watermark_type" type="radio" name="wp2wb_html2img_watermark_type" value="txt" <?php checked( 'txt', get_option( 'wp2wb_html2img_watermark_type' ) ); ?> /><label for="txt_watermark"><?php _e( 'Text Watermark', 'wp2wb' ); ?></label></p>
+                                    <p><input id="img_watermark" class="wp2wb_html2img_watermark_type" type="radio" name="wp2wb_html2img_watermark_type" value="img" <?php checked( 'img', get_option( 'wp2wb_html2img_watermark_type' ) ); ?> /><label for="img_watermark"><?php _e( 'Image Watermark', 'wp2wb' ); ?></label></p>
+                                    <p class="description"><?php _e( 'Water mark type, can be a txt or image file, image file must in media lab', 'wp2wb' ); ?></p></td>
+                                </tr>
+                                <tr valign="top" id="wp2wb_html2img_watermark_txt">
+                                    <th scope="row"><label for="wp2wb_html2img_watermark_txt"><?php _e( 'Watermark text on target image', 'wp2wb' ); ?></label></th>
+                                    <td><input name="wp2wb_html2img_watermark_txt" type="text" id="wp2wb_html2img_watermark_txt" value="<?php print( get_option( 'wp2wb_html2img_watermark_txt' ) ); ?>" size="40" class="regular-text" />
+                                </tr>
+                                <tr valign="top" id="wp2wb_html2img_watermark_img">
+                                    <th scope="row"><label for="wp2wb_html2img_watermark_img"><?php _e( 'Watermark image on target image', 'wp2wb' ); ?></label></th>
+                                    <td>
+                                    <a id="wp2wb_html2img_watermark_img" href="<?php print( get_option( 'wp2wb_html2img_watermark_img' ) ); ?>" onclick = "return false">
+                                    <img src="<?php print( get_option( 'wp2wb_html2img_watermark_img' ) ); ?>" width="100" height="100">
+                                    </a>
+                                    <p class="description"><?php _e( 'Watermark image on target image, width X height < 100 X 100.', 'wp2wb' ); ?></p>
+                                    <input name="wp2wb_html2img_watermark_img" type="text" id="wp2wb_html2img_watermark_img" value="<?php print( get_option( 'wp2wb_html2img_watermark_img' ) ); ?>" size="40" class="regular-text" readonly />
+                                    </td>
+                                </tr>
+                                <tr valign="top">
+                                    <th scope="row"><label for="wp2wb_html2img_watermark_alpha"><?php _e( 'Watermark alpha on image', 'wp2wb' ); ?></label></th>
+                                    <td><input name="wp2wb_html2img_watermark_alpha" type="text" id="wp2wb_html2img_watermark_alpha" value="<?php print( get_option( 'wp2wb_html2img_watermark_alpha' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'Watermark alpha on image, between 0-1.', 'wp2wb' ); ?></p></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
                 <table class="form-table">
                     <tr valign="top">
                         <th scope="row"><?php _e('Donate Me', 'wp2wb'); ?></th>
@@ -293,24 +323,114 @@ if ( !function_exists('wp2wb_option_page') ) {
                 <p class="submit"><input type="submit" name="update_options" class="button-primary" value="<?php _e('Save Changes', 'wp2wb'); ?>" />
                 </p>
             </form>
-            <script type="text/javascript">
-                var isChecked = function ( wp2wb ) {
-                    jQuery( '.wp2wb_enable' ).hide();
-                    jQuery( '#wp2wb_' + wp2wb ).show();
-                };
-                jQuery( document ).ready( function () {
-                    isChecked( jQuery( 'input.wp2wb_sync:checked' ).val() );
-                    jQuery( 'input.wp2wb_sync' ).on( 'change', function ( e ) {
-                        isChecked( jQuery( e.target ).val() );
-                    } );
 
-                    jQuery ( 'input#wp2wb_app_key, input#wp2wb_app_secret' ).on( 'change', function ( e ) {
-                        jQuery('input#wp2wb_access_token').attr('value','');
-                    } );
-                } );
-            </script>
+       <script type="text/javascript">
+            var checkHideShow = function () {
+                console.log("checkHideShow called");
+                
+                if(jQuery('input.wp2wb_sync:checked').val() == 'enable') {
+                    jQuery( 'div#wp2wb_enable' ).show();
+                } else {
+                    jQuery( 'div#wp2wb_enable' ).hide();
+                }
+
+                if(jQuery('input.wp2wb_weibo_type:checked').val() == 'simple') {
+                    jQuery( 'tr#wp2wb_html2img' ).show();
+                    if(jQuery( 'input.wp2wb_html2img:checked').val() == 'true') {
+                        jQuery( 'div#wp2wb_html2img_enable' ).show();
+                    } else {
+                        if(jQuery('input.wp2wb_weibo_type:checked').val() != 'simple') {
+                            jQuery( 'tr#wp2wb_html2img' ).hide();
+                        }
+                        jQuery( 'div#wp2wb_html2img_enable' ).hide();
+                    }
+
+                    if(jQuery( 'input.wp2wb_html2img_watermark:checked').val() == 'true') {
+                        jQuery( 'div#wp2wb_html2img_watermark_enable' ).show();
+                    } else {
+                        jQuery( 'div#wp2wb_html2img_watermark_enable' ).hide();
+                    }
+                } else {
+                    jQuery( 'tr#wp2wb_html2img' ).hide();
+                    jQuery( 'div#wp2wb_html2img_enable' ).hide();
+                    jQuery( 'div#wp2wb_html2img_watermark_enable' ).hide();
+                }
+            };
+
+            var waterMarkChangeType = function() {
+                if(jQuery('input.wp2wb_html2img_watermark_type:checked').val() == 'txt') {
+                    jQuery( 'tr#wp2wb_html2img_watermark_txt' ).show();
+                    jQuery( 'tr#wp2wb_html2img_watermark_img' ).hide();
+                } else {
+                    jQuery( 'tr#wp2wb_html2img_watermark_txt' ).hide();
+                    jQuery( 'tr#wp2wb_html2img_watermark_img' ).show();
+                }
+
+            }
+
+            jQuery( document ).ready( function () {
+                jQuery ( 'input#wp2wb_app_key, input#wp2wb_app_secret' ).on( 'change', function ( e ) {
+                    jQuery('input#wp2wb_access_token').attr('value','');
+                });
+                
+                checkHideShow();
+                waterMarkChangeType();
+
+                jQuery( 'input.wp2wb_sync' ).on( 'change', function ( e ) {
+                    checkHideShow();
+                });
+                jQuery( 'input.wp2wb_weibo_type' ).on( 'change', function ( e ) {
+                    checkHideShow();
+                });
+                jQuery( 'input.wp2wb_html2img' ).on( 'change', function ( e ) {
+                    checkHideShow();
+                });
+                jQuery( 'input.wp2wb_html2img_watermark' ).on( 'change', function ( e ) {
+                    checkHideShow();
+                });
+                jQuery( 'input.wp2wb_html2img_watermark_type' ).on( 'change', function ( e ) {
+                    waterMarkChangeType();
+                });
+                jQuery('a#wp2wb_html2img_watermark_img').on('click', function(){
+                    var selector = wp.media({
+                        // Set the title of the modal.
+                        title: jQuery('input#media_box_title').val(),
+                        // Customize the submit button.
+                        button: {
+                        // Set the text of the button.
+                            text: jQuery('input#media_box_ok').val(),
+                            // Tell the button not to close the modal, since we're
+                            // going to refresh the page when the image is selected.
+                            close: false
+                        }
+                    }).open();
+                 
+                    selector.on('select', function(){
+                        var file = selector.state().get('selection').first().attributes;
+                        var file_path = '';
+                        if(file.width > 100 ||　file.height > 100){
+                            alert(jQuery('input#media_box_too_big').val());
+                                return;
+                            }
+                            
+                            file_path = file.url.substring(jQuery('input#home_url').val().length);
+                            console.log(file_path);
+                            
+                            jQuery('input#wp2wb_html2img_watermark_img').val(file_path);
+                            jQuery('a#wp2wb_html2img_watermark_img').html('<img src="' + file_path + '" width="100" height="100" />');
+                            selector.close();   // close media selector
+                     });
+                });
+            });
+        </script>
         </div><!-- .wrap -->
-    <?php
+        <div id="hidden text">
+        <input id="home_url" type="hidden" name="home_url" value="<?php print( home_url() ); ?>"> 
+        <input id="media_box_title" type="hidden" name="media_box_title" value="<?php print( _e("Select Watermark Image", 'wp2wb') ); ?>"> 
+        <input id="media_box_ok" type="hidden" name="media_box_ok" value="<?php print( _e("OK", 'wp2wb') ); ?>"> 
+        <input id="media_box_too_big" type="hidden" name="media_box_too_big" value="<?php print( _e("Size too big, not fit to watermark", 'wp2wb') ); ?>"> 
+        </div>
+<?php
     }
 }
 
@@ -318,3 +438,5 @@ add_action( 'plugins_loaded', 'wp2wb_load_textdomain' );
 function wp2wb_load_textdomain() {
     load_plugin_textdomain( 'wp2wb', false, basename( dirname( __FILE__ ) ) . '/lang' );
 }
+
+?>
