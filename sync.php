@@ -47,7 +47,7 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
 
         $css = file_get_contents(__DIR__ . get_option('wp2wb_html2img_css'));
 
-        $html = '<html lang="zh_CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>'.
+        $html = '<!doctype html><html lang="zh_CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>'.
             '<style>'.$css.'</style></head><body>'.$post_content.
             '</body></html>';
 
@@ -74,6 +74,12 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
             'margin_right' => 1, 
             'margin_top' => 0, 
             'margin_bottom' => 0]);
+
+        if (get_option('wp2wb_html2img_watermark')) {
+            $mpdf->SetWatermarkText(get_option('wp2wb_html2img_watermark_txt'), 
+                get_option('wp2wb_html2img_watermark_alpha'));
+            $mpdf->showWatermarkText = true;
+        }
 
         $mpdf->autoScriptToLang = true;
         $mpdf->autoLangToFont = true;
@@ -124,10 +130,10 @@ if ( !function_exists('wp2wb_update_sync_publish') ) {
         if ( get_option('wp2wb_weibo_type') == 'simple' ) {
             $apiurl = 'https://api.weibo.com/2/statuses/share.json';
             $status = sprintf( __( '%1$s: %2$s.', 'wp2wb' ), $post_title, $post_url );
-            if( !empty($pic_src) || get_option('wp2wb_html2img')) {
+            if( !empty($pic_src) || get_option('wp2wb_html2img') == 'true') {
                 if(!empty($pic_src)) {
                     $pic_file = str_replace(home_url(),$_SERVER["DOCUMENT_ROOT"],$pic_src);
-                } elseif (get_option('wp2wb_html2img')) {
+                } elseif (get_option('wp2wb_html2img') == 'true') {
                     $pic_file = wp2wb_trans_html_to_img($post_content);
                     $remove_image = true;
                 }
@@ -216,10 +222,10 @@ if ( !function_exists('wp2wb_sync_publish') ) {
             if ( get_option('wp2wb_weibo_type') == 'simple' ) {
                 $apiurl = 'https://api.weibo.com/2/statuses/share.json';
                 $status = sprintf( __( '%1$s: %2$s.', 'wp2wb' ), $post_title, $post_url );
-                if( !empty($pic_src) || get_option('wp2wb_html2img') ) {
+                if( !empty($pic_src) || get_option('wp2wb_html2img') == 'true' ) {
                     if(!empty($pic_src)) {
                         $pic_file = str_replace(home_url(),$_SERVER["DOCUMENT_ROOT"],$pic_src);
-                    } elseif (get_option('wp2wb_html2img')) {
+                    } elseif (get_option('wp2wb_html2img') == 'true') {
                         $pic_file = wp2wb_trans_html_to_img($post_content);
                         $remove_image = true;
                     }

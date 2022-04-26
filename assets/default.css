@@ -4,17 +4,16 @@
 
 body {    
     font-family: pingfang, sans-serif;
-    font-size: small;
+    font-size: x-small;
     font-style: normal;
-	font-weight: normal;
     letter-spacing:1px;
-    background-color: #DFDBC6;
+    background-color: #FEFADD;
     margin-top: 1;
     margin-bottom: 0;
 }
 
 p {
-    line-height: normal;
+    line-height:100%;
 }
 
 
@@ -107,3 +106,4 @@ span.mpdf_toc_p_level_2 { /* Page no. level 2 - may be inside <a> */
 
 }
                                        
+

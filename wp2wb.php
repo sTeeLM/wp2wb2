@@ -23,6 +23,9 @@ $wp2wb_options = array (
     'wp2wb_html2img'            => 'false',
     'wp2wb_html2img_width'      => 50,
     'wp2wb_html2img_css'        => '/assets/default.css',
+    'wp2wb_html2img_watermark'  => 'false',
+    'wp2wb_html2img_watermark_txt' => 'steelmblog',
+    'wp2wb_html2img_watermark_alpha' => 0.1,
 );
 
 include_once(dirname(__FILE__) . '/sync.php');
@@ -111,6 +114,9 @@ if ( !function_exists('wp2wb_options_update') ) {
 			update_option('wp2wb_html2img', $_POST['wp2wb_html2img']);
 			update_option('wp2wb_html2img_width', $_POST['wp2wb_html2img_width']);
 			update_option('wp2wb_html2img_css', $_POST['wp2wb_html2img_css']);
+			update_option('wp2wb_html2img_watermark', $_POST['wp2wb_html2img_watermark']);
+			update_option('wp2wb_html2img_watermark_txt', $_POST['wp2wb_html2img_watermark_txt']);
+			update_option('wp2wb_html2img_watermark_alpha', $_POST['wp2wb_html2img_watermark_alpha']);
 
             $update_sync = !empty($_POST['wp2wb_update_sync']) ? $_POST['wp2wb_update_sync'] : 'false';
             update_option('wp2wb_update_sync', $update_sync);
@@ -240,8 +246,13 @@ if ( !function_exists('wp2wb_option_page') ) {
                         <p class="description"><?php _e( 'Sina toutiao article api need to apply for advanced privileges. You can go to <strong><a href="http://open.weibo.com">Sina Open Platform</a></strong> to apply.', 'wp2wb' ); ?></p></td>
                     </tr>
                     <tr valign="top">
+                        <th scope="row"><?php _e('Post Update Sync', 'wp2wb'); ?></th>
+                        <td><label for="wp2wb_update_sync"><input name="wp2wb_update_sync" type="checkbox" id="wp2wb_update_sync" value="true" <?php checked('true', get_option('wp2wb_update_sync')); ?> /><?php _e('Enable Post Update Sync', 'wp2wb'); ?></label><p class="description"><?php _e( 'By default, the post sync is disabled when updated, check this option if you need to sync.', 'wp2wb' ); ?></p></td>
+                    </tr>
+                    <tr valign="top">
                         <th scope="row"><?php _e('Content to image', 'wp2wb'); ?></th>
-                        <td><p><input id="wp2wb_html2img" class="wp2wb_html2img" type="checkbox" name="wp2wb_html2img" value="true" <?php checked( 'true', get_option( 'wp2wb_html2img' ) ); ?> />
+                        <td><p><input id="wp2wb_html2img" class="wp2wb_html2img" type="checkbox" name="wp2wb_html2img" value="true"
+                            <?php checked( 'true', get_option( 'wp2wb_html2img' ) ); ?> />
                         <label for="wp2wb_html2img"><?php _e( 'Transform content to image when not image include', 'wp2wb' ); ?></label>
                         <p class="description"><?php _e( 'Transform content to image when not image include, because simple type article can not set title and text content.', 'wp2wb' ); ?></p>     
                         </p></td>
@@ -255,8 +266,20 @@ if ( !function_exists('wp2wb_option_page') ) {
                         <td><input name="wp2wb_html2img_css" type="text" id="wp2wb_html2img_css" value="<?php print( get_option( 'wp2wb_html2img_css' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'CSS used by mpdf when create pdf, then create image.', 'wp2wb' ); ?></p></td>
                     </tr>
                     <tr valign="top">
-                        <th scope="row"><?php _e('Post Update Sync', 'wp2wb'); ?></th>
-                        <td><label for="wp2wb_update_sync"><input name="wp2wb_update_sync" type="checkbox" id="wp2wb_update_sync" value="true" <?php checked('true', get_option('wp2wb_update_sync')); ?> /><?php _e('Enable Post Update Sync', 'wp2wb'); ?></label><p class="description"><?php _e( 'By default, the post sync is disabled when updated, check this option if you need to sync.', 'wp2wb' ); ?></p></td>
+                        <th scope="row"><?php _e('Set watermark', 'wp2wb'); ?></th>
+                        <td><p><input id="wp2wb_html2img_watermark" class="wp2wb_html2img_watermark" type="checkbox" name="wp2wb_html2img_watermark" value="true" 
+                            <?php checked( 'true', get_option( 'wp2wb_html2img_watermark' ) ); ?> />
+                        <label for="wp2wb_html2img_watermark"><?php _e( 'Set watermark text on image', 'wp2wb' ); ?></label>
+                        <p class="description"><?php _e( 'Set watermark text on image when transform post context to image file.', 'wp2wb' ); ?></p>     
+                        </p></td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row"><label for="wp2wb_html2img_watermark_txt"><?php _e( 'Watermark text on image', 'wp2wb' ); ?></label></th>
+                        <td><input name="wp2wb_html2img_watermark_txt" type="text" id="wp2wb_html2img_watermark_txt" value="<?php print( get_option( 'wp2wb_html2img_watermark_txt' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'Watermark text on image.', 'wp2wb' ); ?></p></td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row"><label for="wp2wb_html2img_watermark_alpha"><?php _e( 'Watermark alpha on image', 'wp2wb' ); ?></label></th>
+                        <td><input name="wp2wb_html2img_watermark_alpha" type="text" id="wp2wb_html2img_watermark_alpha" value="<?php print( get_option( 'wp2wb_html2img_watermark_alpha' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'Watermark alpha on image, between 0-1.', 'wp2wb' ); ?></p></td>
                     </tr>
                 </table>
                 <table class="form-table">
