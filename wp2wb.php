@@ -275,7 +275,7 @@ if ( !function_exists('wp2wb_option_page') ) {
                     </tr>
                     <tr valign="top">
                         <th scope="row"><label for="wp2wb_html2img_watermark_txt"><?php _e( 'Watermark text on image', 'wp2wb' ); ?></label></th>
-                        <td><input name="wp2wb_html2img_watermark_txt" type="text" id="wp2wb_html2img_watermark_txt" value="<?php print( get_option( 'wp2wb_html2img_watermark_txt' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'Watermark text on image.', 'wp2wb' ); ?></p></td>
+                        <td><input name="wp2wb_html2img_watermark_txt" type="text" id="wp2wb_html2img_watermark_txt" value="<?php print( get_option( 'wp2wb_html2img_watermark_txt' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'Watermark text on image, length < 32.', 'wp2wb' ); ?></p></td>
                     </tr>
                     <tr valign="top">
                         <th scope="row"><label for="wp2wb_html2img_watermark_alpha"><?php _e( 'Watermark alpha on image', 'wp2wb' ); ?></label></th>
