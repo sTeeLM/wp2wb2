@@ -72,7 +72,7 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
             'format' => [$img_width, 1000000], 
             'margin_left' => 1, 
             'margin_right' => 1, 
-            'margin_top' => 0, 
+            'margin_top' => 10, 
             'margin_bottom' => 0]);
 
         if (get_option('wp2wb_html2img_watermark') == 'true') {
