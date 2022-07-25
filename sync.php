@@ -72,7 +72,7 @@ if ( !function_exists( 'wp2wb_trans_html_to_img' ) ) {
             'format' => [$img_width, 1000000], 
             'margin_left' => 1, 
             'margin_right' => 1, 
-            'margin_top' => 10, 
+            'margin_top' => 3, 
             'margin_bottom' => 0]);
 
         if (get_option('wp2wb_html2img_watermark') == 'true') {
@@ -129,6 +129,7 @@ if ( !function_exists('wp2wb_update_sync_publish') ) {
         if (isset($post) && $post->post_type != 'post' || isset($_POST['publish_no_sync'])) return;
         $post = get_post($post_ID);
         $access_token = get_option('wp2wb_access_token');
+        $rip = get_option('wp2wb_siteip');
         $headers = array();
         $headers[] = "Authorization: OAuth2 ".$access_token;
         $post_title = wp2wb_replace(get_the_title($post_ID));
@@ -158,22 +159,28 @@ if ( !function_exists('wp2wb_update_sync_publish') ) {
 
                 $array = explode('?', basename($pic_src));
                 $file_name = $array[0];
+                if(!$file_name) {
+                    $file_name = 'unknown';
+                }
                 $sep = uniqid('------------------');
                 $mpSep = '--'.$sep;
                 $endSep = $mpSep. '--';
                 $multibody = '';
                 $multibody .= $mpSep . "\r\n";
+                $multibody .= 'Content-Disposition: form-data; name="status' . "\"\r\n\r\n";
+                $multibody .= urlencode($status)."\r\n";
+                $multibody .= $mpSep . "\r\n";
+                $multibody .= 'Content-Disposition: form-data; name="rip' . "\"\r\n\r\n";
+                $multibody .= $rip . "\r\n";
+                $multibody .= $mpSep . "\r\n";
                 $multibody .= 'Content-Disposition: form-data; name="pic"; filename="' . $file_name . '"' . "\r\n";
                 $multibody .= "Content-Type: image/unknown\r\n\r\n";
                 $multibody .= $file_content. "\r\n";
-                $multibody .= $mpSep . "\r\n";
-                $multibody .= 'content-disposition: form-data; name="status' . "\"\r\n\r\n";
-                $multibody .= urlencode($status)."\r\n";
                 $multibody .= $endSep;
-                $headers[] = "Content-Type: multipart/form-data; boundary=" . $sep;
+                $headers[1] = "Content-Type: multipart/form-data; boundary=" . $sep;
                 $data = $multibody;
             } else {
-                $data = "status=" . urlencode($status);
+                $data = "status=" . urlencode($status) . "&rip=" . $rip;
             }
         }
 
@@ -205,7 +212,11 @@ if ( !function_exists('wp2wb_update_sync_publish') ) {
         curl_close($ch);
         
         // debug
-        // $results = json_decode($response);
+        $results = json_decode($response);
+        error_log($headers[0]);
+        error_log($headers[1]);
+        error_log($data);
+        error_log($response);
         // var_dump($results);
         // echo '<hr />';
         // var_dump($data);
@@ -221,6 +232,7 @@ if ( !function_exists('wp2wb_sync_publish') ) {
             if (isset($post) && $post->post_type != 'post' || isset($_POST['publish_no_sync'])) return;
             $post = get_post($post_ID);
             $access_token = get_option('wp2wb_access_token');
+            $rip = get_option('wp2wb_siteip');
             $headers = array();
             $headers[] = "Authorization: OAuth2 ".$access_token;
             $post_title = wp2wb_replace(get_the_title($post_ID));
@@ -250,22 +262,28 @@ if ( !function_exists('wp2wb_sync_publish') ) {
 
                     $array = explode('?', basename($pic_src));
                     $file_name = $array[0];
+                    if(!$file_name) {
+                        $file_name = 'unknown';
+                    }
                     $sep = uniqid('------------------');
                     $mpSep = '--'.$sep;
                     $endSep = $mpSep. '--';
                     $multibody = '';
                     $multibody .= $mpSep . "\r\n";
+                    $multibody .= 'Content-Disposition: form-data; name="status' . "\"\r\n\r\n";
+                    $multibody .= urlencode($status)."\r\n";
+                    $multibody .= $mpSep . "\r\n";
+                    $multibody .= 'Content-Disposition: form-data; name="rip' . "\"\r\n\r\n";
+                    $multibody .= $rip . "\r\n";
+                    $multibody .= $mpSep . "\r\n";
                     $multibody .= 'Content-Disposition: form-data; name="pic"; filename="' . $file_name . '"' . "\r\n";
                     $multibody .= "Content-Type: image/unknown\r\n\r\n";
                     $multibody .= $file_content. "\r\n";
-                    $multibody .= $mpSep . "\r\n";
-                    $multibody .= 'content-disposition: form-data; name="status' . "\"\r\n\r\n";
-                    $multibody .= urlencode($status)."\r\n";
                     $multibody .= $endSep;
-                    $headers[] = "Content-Type: multipart/form-data; boundary=" . $sep;
+                    $headers[1] = "Content-Type: multipart/form-data; boundary=" . $sep;
                     $data = $multibody;
                 } else {
-                    $data = "status=" . urlencode($status);
+                    $data = "status=" . urlencode($status) . "&rip=" . $rip;
                 }
             }
 
@@ -302,6 +320,10 @@ if ( !function_exists('wp2wb_sync_publish') ) {
             // var_dump($results);
             // echo '<hr />';
             // var_dump($data);
+            error_log($headers[0]);
+            error_log($headers[1]);
+            error_log($data);
+            error_log($response);
         }
     }
 }

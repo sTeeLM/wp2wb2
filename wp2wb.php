@@ -20,6 +20,7 @@ $wp2wb_options = array (
     'wp2wb_sync'                => 'disable',
     'wp2wb_weibo_type'          => 'simple',
     'wp2wb_update_sync'         => 'false',
+    'wp2wb_siteip'              => '127.0.0.1',
     'wp2wb_html2img'            => 'false',
     'wp2wb_html2img_width'      => 50,
     'wp2wb_html2img_css'        => '/assets/default.css',
@@ -112,15 +113,16 @@ if ( !function_exists('wp2wb_options_update') ) {
             update_option('wp2wb_app_secret', $_POST['wp2wb_app_secret']);
             update_option('wp2wb_access_token', $wp2wb_access_token);
             update_option('wp2wb_sync', $_POST['wp2wb_sync']);
+            update_option('wp2wb_siteip', $_POST['wp2wb_siteip']);
             update_option('wp2wb_weibo_type', $_POST['wp2wb_weibo_type']);
-			update_option('wp2wb_html2img', $_POST['wp2wb_html2img']);
-			update_option('wp2wb_html2img_width', $_POST['wp2wb_html2img_width']);
-			update_option('wp2wb_html2img_css', $_POST['wp2wb_html2img_css']);
-			update_option('wp2wb_html2img_watermark', $_POST['wp2wb_html2img_watermark']);
-			update_option('wp2wb_html2img_watermark_type', $_POST['wp2wb_html2img_watermark_type']);
-			update_option('wp2wb_html2img_watermark_txt', $_POST['wp2wb_html2img_watermark_txt']);
-			update_option('wp2wb_html2img_watermark_img', $_POST['wp2wb_html2img_watermark_img']);
-			update_option('wp2wb_html2img_watermark_alpha', $_POST['wp2wb_html2img_watermark_alpha']);
+            update_option('wp2wb_html2img', $_POST['wp2wb_html2img']);
+            update_option('wp2wb_html2img_width', $_POST['wp2wb_html2img_width']);
+            update_option('wp2wb_html2img_css', $_POST['wp2wb_html2img_css']);
+            update_option('wp2wb_html2img_watermark', $_POST['wp2wb_html2img_watermark']);
+            update_option('wp2wb_html2img_watermark_type', $_POST['wp2wb_html2img_watermark_type']);
+            update_option('wp2wb_html2img_watermark_txt', $_POST['wp2wb_html2img_watermark_txt']);
+            update_option('wp2wb_html2img_watermark_img', $_POST['wp2wb_html2img_watermark_img']);
+            update_option('wp2wb_html2img_watermark_alpha', $_POST['wp2wb_html2img_watermark_alpha']);
 
             $update_sync = !empty($_POST['wp2wb_update_sync']) ? $_POST['wp2wb_update_sync'] : 'false';
             update_option('wp2wb_update_sync', $update_sync);
@@ -239,6 +241,10 @@ if ( !function_exists('wp2wb_option_page') ) {
                         <td><p><input id="sync_enable" class="wp2wb_sync" type="radio" name="wp2wb_sync" value="enable" <?php checked( 'enable', get_option( 'wp2wb_sync' ) ); ?> /><label for="sync_enable"><?php _e( 'Sync Enable', 'wp2wb' ); ?></label></p>
                         <p><input id="sync_disable" class="wp2wb_sync" type="radio" name="wp2wb_sync" value="disable" <?php checked( 'disable', get_option( 'wp2wb_sync' ) ); ?> /><label for="sync_disable"><?php _e( 'Sync Disable', 'wp2wb' ); ?></label></p>
                         </td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row"><label for="wp2wb_siteip"><?php _e( 'Site IP', 'wp2wb' ); ?></label></th>
+                        <td><input name="wp2wb_siteip" type="text" id="wp2wb_siteip" value="<?php print( get_option( 'wp2wb_siteip' ) ); ?>" size="40" class="regular-text" /><p class="description"><?php _e( 'Please enter your site ip.', 'wp2wb' ); ?></p></td>
                     </tr>
                 </table>
                 <div id="wp2wb_enable" >
